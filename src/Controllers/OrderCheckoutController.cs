@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using CodeCrafters_backend_teamwork.src.Abstractions;
 using CodeCrafters_backend_teamwork.src.Controllers;
 using CodeCrafters_backend_teamwork.src.DTO;
 using CodeCrafters_backend_teamwork.src.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CodeCrafters_backend_teamwork.src.Controller
@@ -15,9 +17,9 @@ namespace CodeCrafters_backend_teamwork.src.Controller
         private IOrderCheckoutService _orderCheckoutService;
 
 
-        public OrderCheckoutController (IOrderCheckoutService orderCheckoutService)
+        public OrderCheckoutController(IOrderCheckoutService orderCheckoutService)
 
-        { 
+        {
             _orderCheckoutService = orderCheckoutService;
 
         }
@@ -28,7 +30,7 @@ namespace CodeCrafters_backend_teamwork.src.Controller
         public ActionResult<IEnumerable<OrderCheckout>> FindMany()
         {
 
-            return Ok( _orderCheckoutService.FindMany());
+            return Ok(_orderCheckoutService.FindMany());
 
         }
 
@@ -63,9 +65,19 @@ namespace CodeCrafters_backend_teamwork.src.Controller
         {
             return _orderCheckoutService.UpdateOne(orderCheckoutId, updatedCheckout);
         }
+
+        [Authorize]
         [HttpPost("/checkout")]
         public OrderCheckout Checkout(List<OrderItemCreateDto> orderItemCreateDtos)
         {
-            return _orderCheckoutService.Checkout(orderItemCreateDtos); 
+            Console.WriteLine($"OrderCheckout Controller ");
+
+            var authenticatedClaims = HttpContext.User;
+            var userId = authenticatedClaims.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)!.Value;
+            var userGuid = new Guid(userId);
+            Console.WriteLine($"User id is in controller checkout {userGuid}");
+
+            return _orderCheckoutService.Checkout(orderItemCreateDtos, userGuid);
         }
-}}
+    }
+}

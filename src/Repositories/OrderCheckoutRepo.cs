@@ -54,9 +54,10 @@ namespace CodeCrafters_backend_teamwork.src.Reository
             OrderCheckout? orderCheckout = _checkouts.FirstOrDefault(orderCheckout => orderCheckout.Id == orderCheckoutId);
             if (orderCheckout != null)
             {
-                orderCheckout.Id = updatedCheckout.Id;
-                return orderCheckout;
+
+                _checkouts.Update(orderCheckout);
             }
+            _databaseContext.SaveChanges();
 
             return updatedCheckout;
 

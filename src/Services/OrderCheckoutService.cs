@@ -60,13 +60,24 @@ namespace CodeCrafters_backend_teamwork.src.Services
             throw new NotImplementedException();
         }
 
-        public OrderCheckout Checkout(List<OrderItemCreateDto> orderItemCreateDtos)
+        public OrderCheckout Checkout(List<OrderItemCreateDto> orderItemCreateDtos, Guid userGuid)
         {
             // create an Order object 
             var orderCheckout = new OrderCheckout();
+            // mock data for userId, paymentId, ShippingId
+            orderCheckout.PaymentId = Guid.NewGuid();
+            orderCheckout.ShippingId = Guid.NewGuid();
+            orderCheckout.UserId = userGuid;
+            orderCheckout.Status = "pending";
+            // outside for loop, save order inside order table 
+            _orderCheckoutRepo.CreateOne(orderCheckout);
+            Console.WriteLine($"Order created id {orderCheckout.Id}");
+
             // run for loop for list of orderItemCreateDtos
             foreach (var item in orderItemCreateDtos)
             {
+                Console.WriteLine($"Start running for loop for order item");
+
                 // when you run for loop, it will return a single item 
                 var orderItem = new OrderItem(); ;
 
@@ -76,14 +87,11 @@ namespace CodeCrafters_backend_teamwork.src.Services
                 orderItem.Price = item.Price;
                 // inside for loop, remember to inject _orderItemRepo and then _orderItemRepo.Create(orderItem)
                 _orderItemRepo.CreateOne(orderItem);
+                Console.WriteLine($"Order item created id {orderItem.Id}");
 
             }
-            // mock data for userId, paymentId, ShippingId
-            orderCheckout.PaymentId = Guid.NewGuid();
-            orderCheckout.ShippingId = Guid.NewGuid();
-            orderCheckout.UserId = Guid.NewGuid();
-            // outside for loop, save order inside order table 
-            _orderCheckoutRepo.CreateOne(orderCheckout);
+            _orderCheckoutRepo.UpdateOne(orderCheckout.Id, orderCheckout);
+
             return orderCheckout;
         }
     }
